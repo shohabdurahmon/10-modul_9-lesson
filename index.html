@@ -168,17 +168,19 @@
                             <button onclick="copyCode(this)" class="text-xs font-bold text-gray-400 hover:text-white transition-colors bg-white/5 px-3 py-1 rounded-md"><i class="far fa-copy mr-1"></i> Nusxa olish</button>
                         </div>
                         <div class="p-8 font-mono text-[13px] leading-relaxed text-gray-300 code-content">
-                            <span class="text-purple-400">class</span> <span class="text-orange-400">ForgotPasswordView</span>(View):<br>
-                            <span class="pl-8 text-purple-400">def</span> <span class="text-yellow-400">post</span>(self, request):<br>
-                            <span class="pl-16 text-white">email = request.POST.get(<span class="text-orange-300">"email"</span>)</span><br>
-                            <span class="pl-16 text-white">user = User.objects.filter(email=email).first()</span><br><br>
-                            <span class="pl-16 text-purple-400">if</span> <span class="has-tooltip text-white">user:<span class="tooltip-text">Agar bunday email bazada bo'lsa, kod jo'natamiz. Yo'q bo'lsa xatolik yoki hech narsa qilmaslik mumkin.</span></span><br>
-                            <span class="pl-24 text-white">code = generate_code()</span><br>
-                            <span class="pl-24 text-white">request.session[<span class="text-orange-300">"reset_user_id"</span>] = user.id</span><br>
-                            <span class="pl-24 text-white">request.session[<span class="text-orange-300">"reset_code"</span>] = str(code)</span><br>
-                            <span class="pl-24 text-white">send_register_email(user.email, code)</span><br>
-                            <span class="pl-24 text-blue-400">return</span> redirect(<span class="text-orange-300">"verify_reset"</span>) <span class="text-gray-500"># Verify qilish uchun sahifaga otamiz</span><br><br>
-                            <span class="pl-16 text-blue-400">return</span> redirect(<span class="text-orange-300">"forgot_password"</span>)
+                            <span class="text-purple-400">class</span> <span class="text-orange-400">ForgotPasswordView</span>(TemplateView):<br>
+                            <span class="pl-8 text-white">template_name = <span class="text-orange-300">'auth/forgot-password.html'</span></span><br><br>
+                            <span class="pl-8 text-purple-400">def</span> <span class="text-yellow-400">post</span>(self, request, *args, **kwargs):<br>
+                            <span class="pl-16 text-white">email = request.POST.get(<span class="text-orange-300">'email'</span>)</span><br>
+                            <span class="pl-16 text-white">user = User.objects.filter(email=email).first()</span><br>
+                            <span class="pl-16 text-purple-400">if</span> <span class="has-tooltip text-white">not user:<span class="tooltip-text">Agar email bazada topilmasa, shu sahifaning o‘zida xatolik qaytaramiz.</span></span><br>
+                            <span class="pl-24 text-blue-400">return</span> render(request, self.template_name,<br>
+                            <span class="pl-32 text-white">{<span class="text-orange-300'">'error'</span>: <span class="text-orange-300">'Bunday foydalanuvchi topilmadi'</span>})</span><br><br>
+                            <span class="pl-16 text-white">code = generate_code()</span><br>
+                            <span class="pl-16 text-white">request.session[<span class="text-orange-300">'reset_code'</span>] = code</span><br>
+                            <span class="pl-16 text-white">request.session[<span class="text-orange-300">'reset_user_id'</span>] = user.id</span><br>
+                            <span class="pl-16 text-white">send_register_email(user.email, code)</span><br>
+                            <span class="pl-16 text-blue-400">return</span> redirect(<span class="text-orange-300">'reset-password'</span>)
                         </div>
                     </div>
 
@@ -212,50 +214,62 @@
                 <div class="text-center mb-6">
                     <span class="bg-pdp-cyan text-white px-4 py-1 rounded-full text-xs font-black uppercase shadow-lg shadow-cyan-500/20">Bosqich: Yangi Parol</span>
                     <h2 class="text-3xl font-black mt-2">2. Parolni Yangilash Logikasi</h2>
-                    <p class="text-xs text-gray-500 mt-1 italic">Diqqat: "verify_reset" jarayoni bajarilgandan so'ng bu sahifa ochiladi.</p>
+                    <p class="text-xs text-gray-500 mt-1 italic">Diqqat: foydalanuvchi emailga kelgan kodni va yangi parolini shu sahifada yuboradi.</p>
                 </div>
                 <div class="w-full max-w-6xl h-full overflow-y-auto code-scroll space-y-8 pb-10">
                     <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-xl group border border-slate-700">
                         <div class="bg-slate-800 px-6 py-3 flex justify-between items-center">
-                            <span class="text-xs font-mono text-cyan-400">users/views.py - SetNewPasswordView</span>
+                            <span class="text-xs font-mono text-cyan-400">users/views.py - ResetPasswordView</span>
                             <button onclick="copyCode(this)" class="text-xs font-bold text-gray-400 hover:text-white transition-colors bg-white/5 px-3 py-1 rounded-md"><i class="far fa-copy mr-1"></i> Nusxa olish</button>
                         </div>
                         <div class="p-8 font-mono text-[13px] leading-relaxed text-gray-300 code-content">
-                            <span class="text-purple-400">class</span> <span class="text-cyan-400">SetNewPasswordView</span>(View):<br>
-                            <span class="pl-8 text-purple-400">def</span> <span class="text-yellow-400">post</span>(self, request):<br>
-                            <span class="pl-16 text-white">pass1 = request.POST.get(<span class="text-orange-300">"pass1"</span>)</span><br>
-                            <span class="pl-16 text-white">pass2 = request.POST.get(<span class="text-orange-300">"pass2"</span>)</span><br><br>
-                            <span class="pl-16 text-purple-400">if</span> <span class="has-tooltip text-white">pass1 == pass2:<span class="tooltip-text">Ikkala parol ham bir xil kiritilganini tekshiramiz.</span></span><br>
-                            <span class="pl-24 text-white">user = User.objects.get(id=request.session[<span class="text-orange-300">"reset_user_id"</span>])</span><br>
-                            <span class="pl-24"><span class="has-tooltip text-yellow-400">user.set_password(pass1)<span class="tooltip-text">Djangoning set_password funksiyasi parolni shifrlab (hash) bazaga yozadi. Bu majburiy funksiya!</span></span></span><br>
-                            <span class="pl-24 text-white">user.save()</span><br>
-                            <span class="pl-24 text-white">request.session.flush()</span><br>
-                            <span class="pl-24 text-blue-400">return</span> redirect(<span class="text-orange-300">"login"</span>)<br><br>
-                            <span class="pl-16 text-blue-400">return</span> redirect(<span class="text-orange-300">"set_new_password"</span>)
+                            <span class="text-purple-400">class</span> <span class="text-cyan-400">ResetPasswordView</span>(TemplateView):<br>
+                            <span class="pl-8 text-white">template_name = <span class="text-orange-300">'auth/reset-password.html'</span></span><br><br>
+                            <span class="pl-8 text-purple-400">def</span> <span class="text-yellow-400">post</span>(self, request, *args, **kwargs):<br>
+                            <span class="pl-16 text-white">code = request.POST.get(<span class="text-orange-300">'code'</span>)</span><br>
+                            <span class="pl-16 text-white">password = request.POST.get(<span class="text-orange-300">'password'</span>)</span><br>
+                            <span class="pl-16 text-white">confirm_password = request.POST.get(<span class="text-orange-300">'confirm_password'</span>)</span><br><br>
+                            <span class="pl-16 text-purple-400">if</span> <span class="has-tooltip text-white">code != str(request.session.get(<span class="text-orange-300">'reset_code'</span>)):<span class="tooltip-text">Kiritilgan kod sessiyada saqlangan kod bilan mos bo‘lishi kerak.</span></span><br>
+                            <span class="pl-24 text-blue-400">return</span> render(request, self.template_name, {<span class="text-orange-300">'error'</span>: <span class="text-orange-300">'Kod noto‘g‘ri'</span>})<br><br>
+                            <span class="pl-16 text-purple-400">if</span> <span class="has-tooltip text-white">password != confirm_password:<span class="tooltip-text">Ikkala parol bir xil bo‘lishi kerak.</span></span><br>
+                            <span class="pl-24 text-blue-400">return</span> render(request, self.template_name, {<span class="text-orange-300">'error'</span>: <span class="text-orange-300">'Parollar bir xil emas'</span>})<br><br>
+                            <span class="pl-16 text-white">user = User.objects.filter(id=request.session.get(<span class="text-orange-300">'reset_user_id'</span>)).first()</span><br>
+                            <span class="pl-16 text-purple-400">if</span> <span class="text-white">not user:</span><br>
+                            <span class="pl-24 text-blue-400">return</span> redirect(<span class="text-orange-300">'forgot-password'</span>)<br><br>
+                            <span class="pl-16"><span class="has-tooltip text-yellow-400">user.set_password(password)<span class="tooltip-text">set_password parolni hash qilib saqlaydi.</span></span></span><br>
+                            <span class="pl-16 text-white">user.save()</span><br>
+                            <span class="pl-16 text-white">request.session.pop(<span class="text-orange-300">'reset_code'</span>, None)</span><br>
+                            <span class="pl-16 text-white">request.session.pop(<span class="text-orange-300">'reset_user_id'</span>, None)</span><br>
+                            <span class="pl-16 text-blue-400">return</span> redirect(<span class="text-orange-300">'login'</span>)
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-[#1E1E1E] rounded-2xl p-6 shadow-xl font-mono text-[11px] text-gray-400 group border border-gray-700">
                             <div class="flex justify-between mb-4 border-b border-white/10 pb-2">
-                                <span class="text-cyan-400">auth/set_new_password.html</span>
+                                <span class="text-cyan-400">auth/reset-password.html</span>
                                 <button onclick="copyCode(this)" class="text-xs font-bold text-gray-400 hover:text-white"><i class="far fa-copy"></i></button>
                             </div>
                             <div class="code-content h-40 overflow-y-auto code-scroll">
-                                &lt;form action="{% url 'set_new_password' %}" method="post"&gt;<br>
+                                &lt;form action="{% url 'reset-password' %}" method="post"&gt;<br>
                                 <span class="pl-4">{% csrf_token %}</span><br>
-                                <span class="pl-4">&lt;input name="pass1" type="password"&gt;</span><br>
-                                <span class="pl-4">&lt;input name="pass2" type="password"&gt;</span><br>
+                                <span class="pl-4">&lt;input name="code" type="text" placeholder="Tasdiqlash kodi"&gt;</span><br>
+                                <span class="pl-4">&lt;input name="password" type="password" placeholder="Yangi parol"&gt;</span><br>
+                                <span class="pl-4">&lt;input name="confirm_password" type="password" placeholder="Parolni tasdiqlang"&gt;</span><br>
                                 <span class="pl-4">&lt;button type="submit"&gt;SAVE PASSWORD&lt;/button&gt;</span><br>
                                 &lt;/form&gt;
                             </div>
                         </div>
                         <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 flex flex-col justify-center items-center shadow-md">
-                            <div class="w-full max-w-[280px] bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                <h4 class="text-lg font-black text-gray-800 mb-4 text-center">New Password</h4>
-                                <input type="password" class="w-full border p-3 rounded-lg text-xs mb-3" placeholder="Yangi parol">
-                                <input type="password" class="w-full border p-3 rounded-lg text-xs mb-4" placeholder="Parolni tasdiqlang">
-                                <button class="w-full bg-pdp-cyan text-white py-3 rounded-lg text-xs font-bold uppercase tracking-wider">SAQLASH</button>
+                            <div class="w-full max-w-[320px] bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                <h4 class="text-lg font-black text-gray-800 mb-4 text-center">Reset Password</h4>
+                                <form class="space-y-3">
+
+                                    <input name="code" type="text" class="w-full border p-3 rounded-lg text-xs" placeholder="Tasdiqlash kodi">
+                                    <input name="password" type="password" class="w-full border p-3 rounded-lg text-xs" placeholder="Yangi parol">
+                                    <input name="confirm_password" type="password" class="w-full border p-3 rounded-lg text-xs" placeholder="Parolni tasdiqlang">
+                                    <button class="w-full bg-pdp-cyan text-white py-3 rounded-lg text-xs font-bold uppercase tracking-wider">SAQLASH</button>
+                                </form>
                             </div>
                         </div>
                     </div>
